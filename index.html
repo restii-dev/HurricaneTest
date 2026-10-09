@@ -3,403 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hurricane & Typhoon Historical Testbed</title>
+  <title>Hurricane Testbed — Launch & Historical Archive</title>
   <link href="https://fonts.cdnfonts.com/css/bobloxclassic" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
-    /* ========== LOADING SCREEN - ROBLOX CLASSIC (BobloxClassic font from ArmorTest) ========== */
+    /* ========== LOADING SCREEN - ROBLOX CLASSIC (BobloxClassic from ArmorTest) ========== */
     #loading-screen {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'BobloxClassic', "Arial Black", "Helvetica Neue", Arial, sans-serif;
-      color: #fff;
+      position: fixed; inset: 0; background: #000; z-index: 9999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: 'BobloxClassic', "Arial Black", Arial, sans-serif; color: #fff;
       transition: opacity 0.8s ease, visibility 0.8s;
     }
-    #loading-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     .roblox-logo {
-      font-family: 'BobloxClassic', sans-serif;
-      font-size: 52px;
-      font-weight: normal;
-      letter-spacing: 4px;
-      color: #fff;
-      text-shadow: 0 0 20px rgba(255,255,255,0.3);
-      margin-bottom: 30px;
+      font-family: 'BobloxClassic', sans-serif; font-size: 52px; letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(255,255,255,0.3); margin-bottom: 30px;
       animation: pulse 1.5s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    .loading-text {
-      font-family: 'BobloxClassic', sans-serif;
-      font-size: 18px;
-      margin-bottom: 20px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    .progress-container {
-      width: 320px;
-      height: 18px;
-      background: #222;
-      border: 2px solid #555;
-      border-radius: 2px;
-      overflow: hidden;
-      position: relative;
-    }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #00a2ff, #00d4ff);
-      transition: width 0.15s linear;
-      box-shadow: 0 0 10px #00a2ff;
-    }
-    .progress-percent {
-      margin-top: 12px;
-      font-size: 14px;
-      color: #aaa;
-      font-family: 'BobloxClassic', monospace;
-    }
-    .loading-tip {
-      position: absolute;
-      bottom: 40px;
-      font-size: 13px;
-      color: #666;
-      max-width: 400px;
-      text-align: center;
-      font-family: system-ui, Arial, sans-serif;
-    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+    .loading-text { font-family: 'BobloxClassic', sans-serif; font-size: 18px; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase; }
+    .progress-container { width: 320px; height: 18px; background: #222; border: 2px solid #555; border-radius: 2px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00a2ff, #00d4ff); transition: width 0.15s linear; box-shadow: 0 0 10px #00a2ff; }
+    .progress-percent { margin-top: 12px; font-size: 14px; color: #aaa; font-family: 'BobloxClassic', monospace; }
+    .loading-tip { position: absolute; bottom: 40px; font-size: 13px; color: #666; max-width: 400px; text-align: center; font-family: system-ui, Arial, sans-serif; }
 
-    /* ========== MAIN SITE - SERIOUS PROFESSIONAL ========== */
+    /* ========== MAIN SITE ========== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-      background: #0b1220;
-      color: #e2e8f0;
-      line-height: 1.5;
-      min-height: 100vh;
-    }
+    body { font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; background: #0b1220; color: #e2e8f0; line-height: 1.5; min-height: 100vh; }
     header {
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      border-bottom: 1px solid #334155;
-      padding: 1.25rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border-bottom: 1px solid #334155; padding: 1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.4); flex-wrap: wrap; gap: 0.75rem;
     }
-    .logo {
-      font-family: 'BobloxClassic', system-ui, sans-serif;
-      font-size: 1.35rem;
-      font-weight: normal;
-      color: #38bdf8;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo span { 
-      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-      color: #94a3b8; 
-      font-weight: 400; 
-      font-size: 0.9rem; 
-      letter-spacing: 0;
-    }
-    nav { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .logo { font-family: 'BobloxClassic', system-ui, sans-serif; font-size: 1.25rem; color: #38bdf8; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+    .logo span { font-family: "Segoe UI", system-ui, sans-serif; color: #94a3b8; font-weight: 400; font-size: 0.85rem; letter-spacing: 0; }
+    nav { display: flex; gap: 0.4rem; flex-wrap: wrap; }
     nav button {
-      background: transparent;
-      border: 1px solid #334155;
-      color: #cbd5e1;
-      padding: 0.45rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s;
+      background: transparent; border: 1px solid #334155; color: #cbd5e1;
+      padding: 0.4rem 0.85rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
     }
-    nav button:hover, nav button.active {
-      background: #1e40af;
-      border-color: #3b82f6;
-      color: #fff;
-    }
+    nav button:hover, nav button.active { background: #1e40af; border-color: #3b82f6; color: #fff; }
 
-    main { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    main { max-width: 1400px; margin: 0 auto; padding: 1.25rem; }
 
-    /* Stats Dashboard */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    .stat-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 1.25rem;
-      text-align: center;
-    }
-    .stat-card h3 {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #94a3b8;
-      margin-bottom: 0.4rem;
-    }
-    .stat-card .value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #38bdf8;
-    }
-    .stat-card .sub {
-      font-size: 0.85rem;
-      color: #64748b;
-      margin-top: 0.25rem;
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.1rem; text-align: center; }
+    .stat-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 0.3rem; }
+    .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #38bdf8; }
+    .stat-card .sub { font-size: 0.8rem; color: #64748b; margin-top: 0.2rem; }
 
-    /* Filters */
-    .filters {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      align-items: flex-end;
-    }
-    .filter-group { display: flex; flex-direction: column; gap: 0.3rem; }
-    .filter-group label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #94a3b8;
-    }
-    .filter-group select, .filter-group input {
-      background: #0f172a;
-      border: 1px solid #475569;
-      color: #e2e8f0;
-      padding: 0.45rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      min-width: 140px;
-    }
-    .filter-group select:focus, .filter-group input:focus {
-      outline: none;
-      border-color: #3b82f6;
-    }
-    .search-box { flex: 1; min-width: 200px; }
+    .filters { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.1rem; margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .filter-group label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; }
+    .filter-group select, .filter-group input { background: #0f172a; border: 1px solid #475569; color: #e2e8f0; padding: 0.4rem 0.7rem; border-radius: 6px; font-size: 0.85rem; min-width: 130px; }
+    .filter-group select:focus, .filter-group input:focus { outline: none; border-color: #3b82f6; }
+    .search-box { flex: 1; min-width: 180px; }
 
-    /* Storm Grid */
-    .storm-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.25rem;
-    }
+    .storm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.1rem; }
     .storm-card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 1.25rem;
-      cursor: pointer;
-      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-      position: relative;
-      overflow: hidden;
+      background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.1rem;
+      cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative;
     }
-    .storm-card:hover {
-      transform: translateY(-3px);
-      border-color: #3b82f6;
-      box-shadow: 0 8px 25px rgba(59,130,246,0.15);
-    }
-    .storm-card .cat {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      text-transform: uppercase;
-    }
-    .cat-5 { background: #7f1d1d; color: #fecaca; }
-    .cat-4 { background: #9a3412; color: #fed7aa; }
-    .cat-3 { background: #b45309; color: #fde68a; }
-    .cat-2 { background: #a16207; color: #fef08a; }
-    .cat-1 { background: #3f6212; color: #d9f99d; }
-    .cat-ts { background: #1e3a5f; color: #bae6fd; }
-    .cat-unk { background: #374151; color: #d1d5db; }
-    .storm-card h3 {
-      font-size: 1.15rem;
-      margin-bottom: 0.3rem;
-      color: #f1f5f9;
-      padding-right: 60px;
-    }
-    .storm-card .year {
-      font-size: 0.9rem;
-      color: #94a3b8;
-      margin-bottom: 0.75rem;
-    }
-    .storm-meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-    }
-    .storm-meta div { color: #cbd5e1; }
-    .storm-meta span { color: #64748b; display: block; font-size: 0.75rem; }
-    .basin-tag {
-      display: inline-block;
-      font-size: 0.7rem;
-      background: #0f172a;
-      color: #94a3b8;
-      padding: 0.15rem 0.5rem;
-      border-radius: 4px;
-      margin-top: 0.75rem;
-    }
+    .storm-card:hover { transform: translateY(-3px); border-color: #3b82f6; box-shadow: 0 8px 25px rgba(59,130,246,0.15); }
+    .storm-card .cat { position: absolute; top: 10px; right: 10px; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; }
+    .cat-5 { background: #7f1d1d; color: #fecaca; } .cat-4 { background: #9a3412; color: #fed7aa; }
+    .cat-3 { background: #b45309; color: #fde68a; } .cat-2 { background: #a16207; color: #fef08a; }
+    .cat-1 { background: #3f6212; color: #d9f99d; } .cat-ts { background: #1e3a5f; color: #bae6fd; } .cat-unk { background: #374151; color: #d1d5db; }
+    .storm-card h3 { font-size: 1.05rem; margin-bottom: 0.25rem; color: #f1f5f9; padding-right: 55px; }
+    .storm-card .year { font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.65rem; }
+    .storm-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.8rem; }
+    .storm-meta div { color: #cbd5e1; } .storm-meta span { color: #64748b; display: block; font-size: 0.7rem; }
+    .basin-tag { display: inline-block; font-size: 0.65rem; background: #0f172a; color: #94a3b8; padding: 0.12rem 0.45rem; border-radius: 4px; margin-top: 0.65rem; }
 
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
-    .modal {
-      background: #1e293b;
-      border: 1px solid #475569;
-      border-radius: 12px;
-      max-width: 640px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 1.75rem;
-      position: relative;
-    }
-    .modal h2 { font-size: 1.5rem; margin-bottom: 0.25rem; color: #f8fafc; }
-    .modal .close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
+    .modal { background: #1e293b; border: 1px solid #475569; border-radius: 12px; max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.5rem; position: relative; }
+    .modal h2 { font-size: 1.4rem; margin-bottom: 0.2rem; color: #f8fafc; }
+    .modal .close { position: absolute; top: 0.9rem; right: 0.9rem; background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; }
     .modal .close:hover { color: #fff; }
-    .modal-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 1rem;
-      margin: 1.25rem 0;
-      padding: 1rem;
-      background: #0f172a;
-      border-radius: 8px;
-    }
+    .modal-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.85rem; margin: 1.1rem 0; padding: 0.9rem; background: #0f172a; border-radius: 8px; }
     .modal-stats div { text-align: center; }
-    .modal-stats .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
-    .modal-stats .val { font-size: 1.2rem; font-weight: 600; color: #38bdf8; }
-    .modal p { color: #cbd5e1; margin-bottom: 1rem; font-size: 0.95rem; }
+    .modal-stats .label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; }
+    .modal-stats .val { font-size: 1.1rem; font-weight: 600; color: #38bdf8; }
+    .modal p { color: #cbd5e1; margin-bottom: 0.85rem; font-size: 0.9rem; }
 
-    /* Timeline / Lists */
-    .section-title {
-      font-size: 1.3rem;
-      margin: 2rem 0 1rem;
-      color: #f1f5f9;
-      border-left: 4px solid #3b82f6;
-      padding-left: 0.75rem;
-    }
-    .timeline {
-      position: relative;
-      padding-left: 1.5rem;
-    }
-    .timeline::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #334155;
-    }
-    .timeline-item {
-      position: relative;
-      margin-bottom: 1.5rem;
-      padding-left: 1.25rem;
-    }
-    .timeline-item::before {
-      content: "";
-      position: absolute;
-      left: -1.55rem;
-      top: 0.4rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #3b82f6;
-      border: 2px solid #0b1220;
-    }
-    .timeline-item h4 { color: #e2e8f0; margin-bottom: 0.2rem; }
-    .timeline-item .date { font-size: 0.8rem; color: #64748b; }
-    .timeline-item p { font-size: 0.9rem; color: #94a3b8; }
+    .section-title { font-size: 1.2rem; margin: 1.5rem 0 0.9rem; color: #f1f5f9; border-left: 4px solid #3b82f6; padding-left: 0.7rem; }
+    .timeline { position: relative; padding-left: 1.4rem; }
+    .timeline::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #334155; }
+    .timeline-item { position: relative; margin-bottom: 1.3rem; padding-left: 1.15rem; }
+    .timeline-item::before { content: ""; position: absolute; left: -1.45rem; top: 0.35rem; width: 9px; height: 9px; border-radius: 50%; background: #3b82f6; border: 2px solid #0b1220; }
+    .timeline-item h4 { color: #e2e8f0; margin-bottom: 0.15rem; }
+    .timeline-item .date { font-size: 0.75rem; color: #64748b; }
+    .timeline-item p { font-size: 0.85rem; color: #94a3b8; }
 
-    footer {
-      text-align: center;
-      padding: 2rem;
-      color: #64748b;
-      font-size: 0.85rem;
-      border-top: 1px solid #1e293b;
-      margin-top: 3rem;
-    }
+    footer { text-align: center; padding: 1.75rem; color: #64748b; font-size: 0.8rem; border-top: 1px solid #1e293b; margin-top: 2.5rem; }
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      header { flex-direction: column; gap: 1rem; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .storm-grid { grid-template-columns: 1fr; }
+    /* ========== LAUNCH SIMULATOR ========== */
+    .launch-layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.25rem; min-height: 520px; }
+    @media (max-width: 900px) { .launch-layout { grid-template-columns: 1fr; } }
+    .launch-panel {
+      background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.15rem;
+      display: flex; flex-direction: column; gap: 0.85rem; max-height: 70vh; overflow-y: auto;
     }
+    .launch-panel h3 { font-size: 0.95rem; color: #f1f5f9; margin-bottom: 0.2rem; }
+    .launch-panel label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; display: block; margin-bottom: 0.25rem; }
+    .launch-panel select, .launch-panel input {
+      width: 100%; background: #0f172a; border: 1px solid #475569; color: #e2e8f0;
+      padding: 0.45rem 0.7rem; border-radius: 6px; font-size: 0.9rem;
+    }
+    .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+    .preset-btn {
+      background: #0f172a; border: 1px solid #334155; color: #cbd5e1; padding: 0.5rem 0.4rem;
+      border-radius: 6px; cursor: pointer; font-size: 0.75rem; text-align: center; transition: all 0.15s;
+    }
+    .preset-btn:hover, .preset-btn.active { background: #1e40af; border-color: #3b82f6; color: #fff; }
+    .preset-btn .p-name { font-weight: 600; display: block; }
+    .preset-btn .p-stats { font-size: 0.65rem; color: #94a3b8; }
+    .preset-btn.active .p-stats { color: #bae6fd; }
+    .launch-btn {
+      width: 100%; padding: 0.85rem; font-family: 'BobloxClassic', sans-serif; font-size: 1.05rem;
+      background: linear-gradient(180deg, #c0392b, #8b1a1a); border: 1px solid #e74c3c;
+      border-radius: 8px; color: #fff; cursor: pointer; margin-top: 0.35rem;
+    }
+    .launch-btn:hover { filter: brightness(1.1); }
+    .launch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #map { height: 520px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; z-index: 1; }
+    .map-hint { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.5rem; }
+    .active-storms { margin-top: 0.75rem; }
+    .active-storms h4 { font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .active-item {
+      background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 0.5rem 0.65rem;
+      margin-bottom: 0.35rem; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;
+    }
+    .active-item .s-name { color: #f1f5f9; font-weight: 600; }
+    .active-item .s-meta { color: #94a3b8; font-size: 0.7rem; }
+    .active-item button { background: #7f1d1d; border: none; color: #fecaca; padding: 0.2rem 0.45rem; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+    .coord-display { font-size: 0.8rem; color: #38bdf8; font-family: monospace; }
 
-    /* Hidden sections */
-    .view { display: none; }
-    .view.active { display: block; }
+    .view { display: none; } .view.active { display: block; }
+    @media (max-width: 640px) { header { flex-direction: column; } .stats-grid { grid-template-columns: 1fr 1fr; } .storm-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <!-- ROBLOX CLASSIC LOADING SCREEN -->
   <div id="loading-screen">
     <div class="roblox-logo">ROBLOX</div>
     <div class="loading-text">Loading Hurricane Testbed...</div>
-    <div class="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
     <div class="progress-percent" id="progress-percent">0%</div>
-    <div class="loading-tip">Tip: Stay calm. The storm always passes.</div>
+    <div class="loading-tip">Tip: Click the map to aim. Presets load real storm parameters.</div>
   </div>
 
-  <!-- MAIN SITE -->
   <header>
-    <div class="logo">
-      🌀 Hurricane Testbed
-      <span>Historical Tropical Cyclone Archive</span>
-    </div>
+    <div class="logo">🌀 Hurricane Testbed <span>Launch · Archive</span></div>
     <nav>
-      <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-      <button class="nav-btn" data-view="catalog">Full Catalog</button>
+      <button class="nav-btn active" data-view="launch">Launch</button>
+      <button class="nav-btn" data-view="dashboard">Dashboard</button>
+      <button class="nav-btn" data-view="catalog">Catalog</button>
       <button class="nav-btn" data-view="deadliest">Deadliest</button>
       <button class="nav-btn" data-view="strongest">Strongest</button>
       <button class="nav-btn" data-view="timeline">Timeline</button>
@@ -408,44 +168,78 @@
   </header>
 
   <main>
-    <!-- DASHBOARD -->
-    <div id="view-dashboard" class="view active">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3>Storms Cataloged</h3>
-          <div class="value" id="stat-total">0</div>
-          <div class="sub">Major historical events</div>
+    <!-- LAUNCH SIMULATOR -->
+    <div id="view-launch" class="view active">
+      <p class="map-hint">Click anywhere on the map to set the storm center / landfall target. Choose a preset or custom settings, then hit Launch.</p>
+      <div class="launch-layout">
+        <div class="launch-panel">
+          <h3>Storm Configuration</h3>
+          <div>
+            <label>Preset</label>
+            <div class="preset-grid" id="preset-grid"></div>
+          </div>
+          <div>
+            <label>Storm Name</label>
+            <input type="text" id="storm-name" placeholder="e.g. Hurricane Apex" value="Hurricane Apex">
+          </div>
+          <div>
+            <label>Type / Basin</label>
+            <select id="storm-type">
+              <option value="Hurricane">Hurricane (Atlantic / EPAC)</option>
+              <option value="Typhoon">Typhoon (Western Pacific)</option>
+              <option value="Cyclone">Cyclone (Indian / S. Hemisphere)</option>
+            </select>
+          </div>
+          <div>
+            <label>Category</label>
+            <select id="storm-cat">
+              <option value="TS">Tropical Storm</option>
+              <option value="1">Category 1</option>
+              <option value="2">Category 2</option>
+              <option value="3">Category 3</option>
+              <option value="4">Category 4</option>
+              <option value="5" selected>Category 5</option>
+            </select>
+          </div>
+          <div>
+            <label>Peak Winds (mph)</label>
+            <input type="number" id="storm-winds" min="40" max="220" value="175">
+          </div>
+          <div>
+            <label>Min Pressure (mb)</label>
+            <input type="number" id="storm-pressure" min="860" max="1010" value="920">
+          </div>
+          <div>
+            <label>Target Coordinates</label>
+            <div class="coord-display" id="coord-display">Click map to set…</div>
+          </div>
+          <button class="launch-btn" id="launch-btn" disabled>LAUNCH STORM</button>
+          <div class="active-storms">
+            <h4>Active Storms</h4>
+            <div id="active-list"><div style="color:#64748b;font-size:0.8rem;">None yet. Launch one.</div></div>
+          </div>
         </div>
-        <div class="stat-card">
-          <h3>Highest Winds</h3>
-          <div class="value" id="stat-winds">—</div>
-          <div class="sub" id="stat-winds-name">—</div>
-        </div>
-        <div class="stat-card">
-          <h3>Deadliest</h3>
-          <div class="value" id="stat-deaths">—</div>
-          <div class="sub" id="stat-deaths-name">—</div>
-        </div>
-        <div class="stat-card">
-          <h3>Lowest Pressure</h3>
-          <div class="value" id="stat-pressure">—</div>
-          <div class="sub" id="stat-pressure-name">—</div>
-        </div>
+        <div id="map"></div>
       </div>
+    </div>
 
+    <!-- DASHBOARD -->
+    <div id="view-dashboard" class="view">
+      <div class="stats-grid">
+        <div class="stat-card"><h3>Storms Cataloged</h3><div class="value" id="stat-total">0</div><div class="sub">Major historical events</div></div>
+        <div class="stat-card"><h3>Highest Winds</h3><div class="value" id="stat-winds">—</div><div class="sub" id="stat-winds-name">—</div></div>
+        <div class="stat-card"><h3>Deadliest</h3><div class="value" id="stat-deaths">—</div><div class="sub" id="stat-deaths-name">—</div></div>
+        <div class="stat-card"><h3>Lowest Pressure</h3><div class="value" id="stat-pressure">—</div><div class="sub" id="stat-pressure-name">—</div></div>
+      </div>
       <h2 class="section-title">Featured Major Events</h2>
       <div class="storm-grid" id="featured-grid"></div>
     </div>
 
-    <!-- FULL CATALOG -->
+    <!-- CATALOG -->
     <div id="view-catalog" class="view">
       <div class="filters">
-        <div class="filter-group search-box">
-          <label>Search</label>
-          <input type="text" id="search-input" placeholder="Name, year, region...">
-        </div>
-        <div class="filter-group">
-          <label>Basin</label>
+        <div class="filter-group search-box"><label>Search</label><input type="text" id="search-input" placeholder="Name, year, region..."></div>
+        <div class="filter-group"><label>Basin</label>
           <select id="filter-basin">
             <option value="all">All Basins</option>
             <option value="Atlantic">Atlantic</option>
@@ -455,25 +249,16 @@
             <option value="South Indian / Australia">South Indian / Australia</option>
           </select>
         </div>
-        <div class="filter-group">
-          <label>Category</label>
+        <div class="filter-group"><label>Category</label>
           <select id="filter-cat">
-            <option value="all">All</option>
-            <option value="5">Category 5</option>
-            <option value="4">Category 4</option>
-            <option value="3">Category 3</option>
-            <option value="2">Category 2</option>
-            <option value="1">Category 1</option>
-            <option value="TS">Tropical Storm</option>
+            <option value="all">All</option><option value="5">Cat 5</option><option value="4">Cat 4</option>
+            <option value="3">Cat 3</option><option value="2">Cat 2</option><option value="1">Cat 1</option><option value="TS">TS</option>
           </select>
         </div>
-        <div class="filter-group">
-          <label>Sort By</label>
+        <div class="filter-group"><label>Sort By</label>
           <select id="filter-sort">
-            <option value="year-desc">Year (Newest)</option>
-            <option value="year-asc">Year (Oldest)</option>
-            <option value="deaths-desc">Deaths (Highest)</option>
-            <option value="winds-desc">Winds (Highest)</option>
+            <option value="year-desc">Year (Newest)</option><option value="year-asc">Year (Oldest)</option>
+            <option value="deaths-desc">Deaths (Highest)</option><option value="winds-desc">Winds (Highest)</option>
             <option value="pressure-asc">Pressure (Lowest)</option>
           </select>
         </div>
@@ -481,139 +266,107 @@
       <div class="storm-grid" id="catalog-grid"></div>
     </div>
 
-    <!-- DEADLIEST -->
     <div id="view-deadliest" class="view">
       <h2 class="section-title">Deadliest Tropical Cyclones on Record</h2>
-      <p style="color:#94a3b8;margin-bottom:1.5rem;">Ranked by estimated fatalities. Many historical counts remain uncertain.</p>
+      <p style="color:#94a3b8;margin-bottom:1.25rem;font-size:0.9rem;">Ranked by estimated fatalities. Historical counts often uncertain.</p>
       <div class="storm-grid" id="deadliest-grid"></div>
     </div>
 
-    <!-- STRONGEST -->
     <div id="view-strongest" class="view">
-      <h2 class="section-title">Strongest by Peak Winds & Lowest Pressure</h2>
-      <p style="color:#94a3b8;margin-bottom:1.5rem;">Peak 1-minute sustained winds (or best available) and minimum central pressure.</p>
+      <h2 class="section-title">Strongest by Peak Winds</h2>
       <div class="storm-grid" id="strongest-grid"></div>
     </div>
 
-    <!-- TIMELINE -->
     <div id="view-timeline" class="view">
       <h2 class="section-title">Selected Historical Timeline</h2>
       <div class="timeline" id="timeline-list"></div>
     </div>
 
-    <!-- ABOUT -->
     <div id="view-about" class="view">
       <h2 class="section-title">About This Testbed</h2>
       <div style="max-width:720px;color:#cbd5e1;font-size:0.95rem;">
-        <p style="margin-bottom:1rem;">This Hurricane & Typhoon Historical Testbed is a research-style interface for exploring major tropical cyclones across all ocean basins. It draws from publicly available best-track data concepts (HURDAT-style), historical records, and published fatality/intensity analyses.</p>
-        <p style="margin-bottom:1rem;">The loading sequence is styled after the classic Roblox experience using the BobloxClassic font (same one used in ArmorTest). Everything after that uses a clean professional typeface and interface suitable for serious meteorological review.</p>
-        <p style="margin-bottom:1rem;"><strong>Coverage notes:</strong> The catalog prioritizes historically significant storms — the deadliest, strongest, costliest, and culturally notable events from the Atlantic, Eastern & Western Pacific, North Indian Ocean, and Southern Hemisphere. It is not an exhaustive list of every named or unnamed system (that database exceeds 15,000 entries).</p>
-        <p style="margin-bottom:1rem;">Data sources conceptually include NOAA NHC HURDAT2, JTWC best tracks, historical reanalyses, and published fatality compilations. Individual storm details may reflect best available estimates; older events often carry large uncertainty ranges.</p>
-        <p>Built for exploration, education, and testing of tropical cyclone historical knowledge.</p>
+        <p style="margin-bottom:1rem;">Hurricane Testbed lets you launch simulated tropical cyclones at any point on Earth using real-world-style presets, and explore a catalog of major historical hurricanes, typhoons, and cyclones.</p>
+        <p style="margin-bottom:1rem;">Loading screen uses the BobloxClassic font (same as ArmorTest). The rest of the interface stays clean and professional.</p>
+        <p style="margin-bottom:1rem;">Custom domain: hurricanetest.org (CNAME configured for GitHub Pages).</p>
+        <p>Educational / research exploration tool. Not an official NOAA product.</p>
       </div>
     </div>
   </main>
 
-  <footer>
-    Hurricane & Typhoon Historical Testbed · For educational and research exploration · Not an official NOAA product
-  </footer>
+  <footer>Hurricane Testbed · Launch storms · Historical archive · hurricanetest.org</footer>
 
-  <!-- MODAL -->
   <div class="modal-overlay" id="modal">
     <div class="modal">
       <button class="close" id="modal-close">&times;</button>
       <h2 id="modal-title"></h2>
-      <div style="color:#94a3b8;font-size:0.9rem;margin-bottom:0.5rem;" id="modal-subtitle"></div>
+      <div style="color:#94a3b8;font-size:0.85rem;margin-bottom:0.4rem;" id="modal-subtitle"></div>
       <div class="modal-stats" id="modal-stats"></div>
       <p id="modal-desc"></p>
     </div>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ===================== DATASET =====================
-    // Major historical tropical cyclones (hurricanes, typhoons, cyclones)
-    // Fields: name, year, basin, category, winds (mph), pressure (mb), deaths, damage (USD approx or note), desc
+    // ===== HISTORICAL DATA (compact major set) =====
     const storms = [
-      // Deadliest / Famous Indian Ocean
-      {name:"Bhola Cyclone", year:1970, basin:"North Indian", category:"3", winds:115, pressure:966, deaths:300000, damage:"~450M", desc:"Deadliest tropical cyclone on record. Struck East Pakistan (now Bangladesh) with catastrophic storm surge. Estimates range 300,000–500,000 fatalities."},
-      {name:"Coringa Cyclone", year:1839, basin:"North Indian", category:"unk", winds:null, pressure:null, deaths:300000, damage:"Port destroyed", desc:"Devastated the port of Coringa in present-day Andhra Pradesh, India. One of the deadliest storms in history; exact intensity unknown."},
-      {name:"Haiphong Typhoon", year:1881, basin:"Western Pacific", category:"unk", winds:null, pressure:null, deaths:300000, damage:"Severe", desc:"Struck northern Vietnam near Haiphong. Massive loss of life from storm surge and subsequent disease/starvation."},
-      {name:"Typhoon Nina", year:1975, basin:"Western Pacific", category:"4", winds:150, pressure:900, deaths:171000, damage:"Dam collapse", desc:"Caused the catastrophic failure of the Banqiao and Shimantan dams in China, leading to enormous flooding and loss of life."},
-      {name:"Bengal Cyclone (Backerganj)", year:1876, basin:"North Indian", category:"unk", winds:null, pressure:null, deaths:200000, damage:"Severe", desc:"Struck the Bengal region with massive storm surge. Death toll estimates around 200,000 excluding later disease."},
-      {name:"1991 Bangladesh Cyclone", year:1991, basin:"North Indian", category:"4", winds:160, pressure:918, deaths:140000, damage:"~1.8B", desc:"Also known as Cyclone Gorky. Struck the Chittagong region with extreme surge. Major improvements in warning systems followed."},
-      {name:"Cyclone Nargis", year:2008, basin:"North Indian", category:"4", winds:135, pressure:937, deaths:138000, damage:"~12B", desc:"Devastated the Irrawaddy Delta in Myanmar. One of the deadliest storms of the 21st century."},
-
-      // Deadliest Atlantic
-      {name:"Great Hurricane of 1780", year:1780, basin:"Atlantic", category:"unk", winds:null, pressure:null, deaths:22000, damage:"Severe", desc:"Deadliest Atlantic hurricane on record. Devastated the Lesser Antilles (Barbados, Martinique, St. Eustatius) during the American Revolutionary War era."},
-      {name:"Galveston Hurricane", year:1900, basin:"Atlantic", category:"4", winds:145, pressure:936, deaths:8000, damage:"~35M (then)", desc:"Deadliest natural disaster in U.S. history. Storm surge overwhelmed Galveston, Texas. Estimates 8,000–12,000 deaths."},
-      {name:"Hurricane Mitch", year:1998, basin:"Atlantic", category:"5", winds:180, pressure:905, deaths:11300, damage:"~6B", desc:"Stalled over Central America causing catastrophic flooding and landslides in Honduras and Nicaragua."},
-      {name:"Hurricane Fifi", year:1974, basin:"Atlantic", category:"2", winds:110, pressure:971, deaths:8000, damage:"Severe", desc:"Struck Honduras with extreme rainfall and flooding. Death estimates 8,000–10,000."},
-      {name:"Okeechobee Hurricane", year:1928, basin:"Atlantic", category:"4", winds:160, pressure:929, deaths:2500, damage:"~100M (then)", desc:"Caused Lake Okeechobee to overtop dikes, flooding surrounding communities in Florida. Also known as the San Felipe Segundo Hurricane."},
-      {name:"Hurricane Flora", year:1963, basin:"Atlantic", category:"4", winds:145, pressure:940, deaths:7000, damage:"Severe", desc:"Slow-moving storm that devastated Haiti and Cuba with extreme rainfall."},
-
-      // Strongest / Most Intense
-      {name:"Hurricane Patricia", year:2015, basin:"Eastern Pacific", category:"5", winds:215, pressure:872, deaths:13, damage:"~460M", desc:"Highest reliably measured sustained winds of any tropical cyclone worldwide (215 mph). Rapid intensification off Mexico."},
-      {name:"Typhoon Tip", year:1979, basin:"Western Pacific", category:"5", winds:190, pressure:870, deaths:99, damage:"Moderate", desc:"Lowest central pressure on record for any tropical cyclone (870 mb). Also one of the largest storms by diameter."},
-      {name:"Hurricane Allen", year:1980, basin:"Atlantic", category:"5", winds:190, pressure:899, deaths:269, damage:"~1.5B", desc:"Tied for highest winds in an Atlantic hurricane. Multiple landfalls in the Caribbean and Mexico/Texas."},
-      {name:"Labor Day Hurricane", year:1935, basin:"Atlantic", category:"5", winds:185, pressure:892, deaths:408, damage:"Severe", desc:"Most intense U.S. landfalling hurricane by pressure. Struck the Florida Keys with catastrophic force."},
-      {name:"Hurricane Gilbert", year:1988, basin:"Atlantic", category:"5", winds:185, pressure:888, deaths:318, damage:"~7B", desc:"Lowest pressure for an Atlantic hurricane until Wilma. Devastated Jamaica and the Yucatán."},
-      {name:"Hurricane Wilma", year:2005, basin:"Atlantic", category:"5", winds:185, pressure:882, deaths:62, damage:"~29B", desc:"Lowest pressure ever recorded in an Atlantic hurricane (882 mb). Rapid intensification in the Caribbean."},
-      {name:"Typhoon Haiyan (Yolanda)", year:2013, basin:"Western Pacific", category:"5", winds:195, pressure:895, deaths:6300, damage:"~3B", desc:"One of the most intense landfalling storms ever. Catastrophic storm surge in the Philippines, especially Tacloban."},
-      {name:"Typhoon Meranti", year:2016, basin:"Western Pacific", category:"5", winds:195, pressure:890, deaths:47, damage:"~4.8B", desc:"Extremely intense Western Pacific typhoon. Struck the Philippines, Taiwan, and China."},
-      {name:"Cyclone Winston", year:2016, basin:"South Indian / Australia", category:"5", winds:175, pressure:884, deaths:44, damage:"~1.4B", desc:"Most intense tropical cyclone on record in the Southern Hemisphere. Devastated Fiji."},
-      {name:"Hurricane Camille", year:1969, basin:"Atlantic", category:"5", winds:175, pressure:900, deaths:259, damage:"~1.4B", desc:"Catastrophic Category 5 landfall on the Mississippi coast. Extreme winds and surge."},
-      {name:"Hurricane Andrew", year:1992, basin:"Atlantic", category:"5", winds:175, pressure:922, deaths:65, damage:"~27B", desc:"Devastated South Florida. Led to major changes in building codes."},
-      {name:"Hurricane Katrina", year:2005, basin:"Atlantic", category:"5", winds:175, pressure:902, deaths:1833, damage:"~161B", desc:"Costliest U.S. hurricane. Catastrophic flooding in New Orleans after levee failures."},
-      {name:"Hurricane Maria", year:2017, basin:"Atlantic", category:"5", winds:175, pressure:908, deaths:3059, damage:"~91B", desc:"Catastrophic impact on Puerto Rico. Long-term power and infrastructure failure."},
-      {name:"Hurricane Irma", year:2017, basin:"Atlantic", category:"5", winds:180, pressure:914, deaths:134, damage:"~77B", desc:"Held Category 5 intensity for a prolonged period. Devastated the Leeward Islands and Florida Keys."},
-      {name:"Hurricane Dorian", year:2019, basin:"Atlantic", category:"5", winds:185, pressure:910, deaths:84, damage:"~5B", desc:"Stalled over the northwestern Bahamas with catastrophic Category 5 conditions for over a day."},
-      {name:"Hurricane Michael", year:2018, basin:"Atlantic", category:"5", winds:160, pressure:919, deaths:74, damage:"~25B", desc:"First Category 5 landfall in the Florida Panhandle on record."},
-
-      // Other historically significant
-      {name:"Hurricane Sandy", year:2012, basin:"Atlantic", category:"3", winds:115, pressure:940, deaths:233, damage:"~70B", desc:"Hybrid storm that caused massive damage along the U.S. Northeast coast, especially New York and New Jersey."},
-      {name:"Hurricane Harvey", year:2017, basin:"Atlantic", category:"4", winds:130, pressure:938, deaths:107, damage:"~125B", desc:"Produced extreme rainfall over Houston. One of the costliest storms in U.S. history."},
-      {name:"Hurricane Ian", year:2022, basin:"Atlantic", category:"5", winds:160, pressure:937, deaths:161, damage:"~113B", desc:"Devastating landfall in Southwest Florida. Extreme surge and wind damage."},
-      {name:"Great Miami Hurricane", year:1926, basin:"Atlantic", category:"4", winds:150, pressure:930, deaths:372, damage:"~100M (then)", desc:"Destroyed much of Miami during the Florida land boom. Led to early awareness of hurricane risk."},
-      {name:"New England Hurricane", year:1938, basin:"Atlantic", category:"3", winds:120, pressure:940, deaths:682, damage:"~300M (then)", desc:"Unexpected rapid track into New England. Major flooding and wind damage across the Northeast."},
-      {name:"Hurricane Hugo", year:1989, basin:"Atlantic", category:"4", winds:160, pressure:918, deaths:107, damage:"~10B", desc:"Major impact on the Carolinas and Caribbean. Significant inland damage."},
-      {name:"Hurricane Rita", year:2005, basin:"Atlantic", category:"5", winds:180, pressure:895, deaths:120, damage:"~18B", desc:"Fourth-most intense Atlantic hurricane by pressure at the time. Threatened Texas/Louisiana."},
-      {name:"Typhoon Vera (Isewan)", year:1959, basin:"Western Pacific", category:"5", winds:190, pressure:895, deaths:5000, damage:"Severe", desc:"One of the deadliest typhoons to strike Japan. Extreme storm surge in Ise Bay."},
-      {name:"Cyclone Tracy", year:1974, basin:"South Indian / Australia", category:"4", winds:135, pressure:950, deaths:71, damage:"~800M", desc:"Destroyed Darwin, Australia on Christmas Day. Led to major changes in Australian building standards."},
-      {name:"Hurricane Audrey", year:1957, basin:"Atlantic", category:"4", winds:145, pressure:946, deaths:416, damage:"~150M", desc:"Unexpected early-season landfall in Louisiana/Texas. Rapid intensification."},
-      {name:"Hurricane Betsy", year:1965, basin:"Atlantic", category:"4", winds:155, pressure:941, deaths:81, damage:"~1.4B", desc:"First billion-dollar hurricane. Major impact on Louisiana."},
-      {name:"Hurricane Ike", year:2008, basin:"Atlantic", category:"4", winds:145, pressure:935, deaths:214, damage:"~38B", desc:"Large storm with extreme surge along the Texas coast and significant Caribbean impacts."},
-      {name:"Hurricane Matthew", year:2016, basin:"Atlantic", category:"5", winds:165, pressure:934, deaths:603, damage:"~15B", desc:"Deadly impacts in Haiti and significant damage along the U.S. Southeast coast."},
-      {name:"Hurricane Florence", year:2018, basin:"Atlantic", category:"4", winds:140, pressure:937, deaths:53, damage:"~24B", desc:"Stalled over the Carolinas producing extreme rainfall and flooding."},
-      {name:"Hurricane Laura", year:2020, basin:"Atlantic", category:"4", winds:150, pressure:937, deaths:81, damage:"~19B", desc:"Extreme winds and surge in Southwest Louisiana."},
-      {name:"Hurricane Ida", year:2021, basin:"Atlantic", category:"4", winds:150, pressure:929, deaths:107, damage:"~75B", desc:"Major Louisiana landfall followed by deadly flooding in the Northeast."},
-      {name:"Hurricane Charley", year:2004, basin:"Atlantic", category:"4", winds:150, pressure:941, deaths:35, damage:"~16B", desc:"Rapid intensification and unexpected track into Punta Gorda, Florida."},
-      {name:"Hurricane Ivan", year:2004, basin:"Atlantic", category:"5", winds:165, pressure:910, deaths:124, damage:"~26B", desc:"Long-lived major hurricane with multiple landfalls and extreme waves."},
-      {name:"Hurricane Jeanne", year:2004, basin:"Atlantic", category:"3", winds:120, pressure:950, deaths:3000, damage:"~7.5B", desc:"Deadly flooding in Haiti followed by Florida landfall."},
-      {name:"Hurricane Isabel", year:2003, basin:"Atlantic", category:"5", winds:165, pressure:915, deaths:51, damage:"~5.5B", desc:"Large Category 5 that weakened before U.S. landfall but still caused widespread damage from North Carolina northward."},
-      {name:"Hurricane Floyd", year:1999, basin:"Atlantic", category:"4", winds:155, pressure:921, deaths:85, damage:"~6.5B", desc:"Massive evacuation and extreme inland flooding across the East Coast."},
-      {name:"Hurricane Fran", year:1996, basin:"Atlantic", category:"3", winds:120, pressure:946, deaths:37, damage:"~5B", desc:"Major impact on North Carolina. Significant inland flooding."},
-      {name:"Hurricane Alicia", year:1983, basin:"Atlantic", category:"3", winds:115, pressure:962, deaths:21, damage:"~3B", desc:"First hurricane to hit the U.S. mainland after a multi-year quiet period. Houston impact."},
-      {name:"Hurricane Celia", year:1970, basin:"Atlantic", category:"3", winds:125, pressure:945, deaths:27, damage:"~450M", desc:"Unusual small core of extreme winds that devastated Corpus Christi, Texas."},
-      {name:"Hurricane Dennis", year:2005, basin:"Atlantic", category:"4", winds:150, pressure:930, deaths:89, damage:"~4B", desc:"Early-season major hurricane impacting Cuba and the Florida Panhandle."},
-      {name:"Hurricane Emily", year:2005, basin:"Atlantic", category:"5", winds:160, pressure:929, deaths:17, damage:"~1B", desc:"Earliest Category 5 in the Atlantic basin on record at the time."},
-      {name:"Hurricane Rita", year:2005, basin:"Atlantic", category:"5", winds:180, pressure:895, deaths:120, damage:"~18B", desc:"Texas/Louisiana threat after Katrina."},
-      {name:"Hurricane Irene", year:2011, basin:"Atlantic", category:"3", winds:120, pressure:942, deaths:56, damage:"~15B", desc:"Major East Coast impacts with extreme inland flooding in the Northeast."},
-      {name:"Hurricane Isaac", year:2012, basin:"Atlantic", category:"1", winds:80, pressure:965, deaths:41, damage:"~3B", desc:"Slow-moving storm that produced significant flooding in Louisiana."},
-      {name:"Hurricane Ophelia", year:2005, basin:"Atlantic", category:"1", winds:85, pressure:976, deaths:3, damage:"~70M", desc:"Long-lived storm that meandered off the Southeast U.S. coast."}
+      {name:"Bhola Cyclone",year:1970,basin:"North Indian",category:"3",winds:115,pressure:966,deaths:300000,damage:"~450M",desc:"Deadliest tropical cyclone on record. East Pakistan (Bangladesh) storm surge."},
+      {name:"Coringa Cyclone",year:1839,basin:"North Indian",category:"unk",winds:null,pressure:null,deaths:300000,damage:"Port destroyed",desc:"Devastated Coringa, India. One of history's deadliest."},
+      {name:"Haiphong Typhoon",year:1881,basin:"Western Pacific",category:"unk",winds:null,pressure:null,deaths:300000,damage:"Severe",desc:"Northern Vietnam. Massive surge + aftermath."},
+      {name:"Typhoon Nina",year:1975,basin:"Western Pacific",category:"4",winds:150,pressure:900,deaths:171000,damage:"Dam collapse",desc:"Banqiao & Shimantan dam failures in China."},
+      {name:"Bengal Cyclone (Backerganj)",year:1876,basin:"North Indian",category:"unk",winds:null,pressure:null,deaths:200000,damage:"Severe",desc:"Bengal surge disaster."},
+      {name:"1991 Bangladesh Cyclone",year:1991,basin:"North Indian",category:"4",winds:160,pressure:918,deaths:140000,damage:"~1.8B",desc:"Cyclone Gorky. Chittagong region."},
+      {name:"Cyclone Nargis",year:2008,basin:"North Indian",category:"4",winds:135,pressure:937,deaths:138000,damage:"~12B",desc:"Myanmar Irrawaddy Delta."},
+      {name:"Great Hurricane of 1780",year:1780,basin:"Atlantic",category:"unk",winds:null,pressure:null,deaths:22000,damage:"Severe",desc:"Deadliest Atlantic hurricane. Lesser Antilles."},
+      {name:"Galveston Hurricane",year:1900,basin:"Atlantic",category:"4",winds:145,pressure:936,deaths:8000,damage:"~35M (then)",desc:"Deadliest U.S. natural disaster."},
+      {name:"Hurricane Mitch",year:1998,basin:"Atlantic",category:"5",winds:180,pressure:905,deaths:11300,damage:"~6B",desc:"Central America flooding catastrophe."},
+      {name:"Hurricane Fifi",year:1974,basin:"Atlantic",category:"2",winds:110,pressure:971,deaths:8000,damage:"Severe",desc:"Honduras flooding."},
+      {name:"Okeechobee Hurricane",year:1928,basin:"Atlantic",category:"4",winds:160,pressure:929,deaths:2500,damage:"~100M (then)",desc:"Lake Okeechobee dike failure."},
+      {name:"Hurricane Flora",year:1963,basin:"Atlantic",category:"4",winds:145,pressure:940,deaths:7000,damage:"Severe",desc:"Haiti & Cuba extreme rain."},
+      {name:"Hurricane Patricia",year:2015,basin:"Eastern Pacific",category:"5",winds:215,pressure:872,deaths:13,damage:"~460M",desc:"Highest reliable sustained winds on record."},
+      {name:"Typhoon Tip",year:1979,basin:"Western Pacific",category:"5",winds:190,pressure:870,deaths:99,damage:"Moderate",desc:"Lowest central pressure ever recorded (870 mb)."},
+      {name:"Hurricane Allen",year:1980,basin:"Atlantic",category:"5",winds:190,pressure:899,deaths:269,damage:"~1.5B",desc:"Tied highest Atlantic winds."},
+      {name:"Labor Day Hurricane",year:1935,basin:"Atlantic",category:"5",winds:185,pressure:892,deaths:408,damage:"Severe",desc:"Most intense U.S. landfall by pressure. Florida Keys."},
+      {name:"Hurricane Gilbert",year:1988,basin:"Atlantic",category:"5",winds:185,pressure:888,deaths:318,damage:"~7B",desc:"Record low Atlantic pressure until Wilma."},
+      {name:"Hurricane Wilma",year:2005,basin:"Atlantic",category:"5",winds:185,pressure:882,deaths:62,damage:"~29B",desc:"Lowest Atlantic pressure on record."},
+      {name:"Typhoon Haiyan (Yolanda)",year:2013,basin:"Western Pacific",category:"5",winds:195,pressure:895,deaths:6300,damage:"~3B",desc:"Extreme landfalling intensity. Philippines."},
+      {name:"Typhoon Meranti",year:2016,basin:"Western Pacific",category:"5",winds:195,pressure:890,deaths:47,damage:"~4.8B",desc:"Super typhoon."},
+      {name:"Cyclone Winston",year:2016,basin:"South Indian / Australia",category:"5",winds:175,pressure:884,deaths:44,damage:"~1.4B",desc:"Strongest Southern Hemisphere cyclone."},
+      {name:"Hurricane Camille",year:1969,basin:"Atlantic",category:"5",winds:175,pressure:900,deaths:259,damage:"~1.4B",desc:"Mississippi coast Cat 5."},
+      {name:"Hurricane Andrew",year:1992,basin:"Atlantic",category:"5",winds:175,pressure:922,deaths:65,damage:"~27B",desc:"South Florida. Building-code changer."},
+      {name:"Hurricane Katrina",year:2005,basin:"Atlantic",category:"5",winds:175,pressure:902,deaths:1833,damage:"~161B",desc:"Costliest U.S. hurricane. New Orleans."},
+      {name:"Hurricane Maria",year:2017,basin:"Atlantic",category:"5",winds:175,pressure:908,deaths:3059,damage:"~91B",desc:"Puerto Rico catastrophe."},
+      {name:"Hurricane Irma",year:2017,basin:"Atlantic",category:"5",winds:180,pressure:914,deaths:134,damage:"~77B",desc:"Prolonged Cat 5. Leewards & Florida."},
+      {name:"Hurricane Dorian",year:2019,basin:"Atlantic",category:"5",winds:185,pressure:910,deaths:84,damage:"~5B",desc:"Stalled over Bahamas at Cat 5."},
+      {name:"Hurricane Michael",year:2018,basin:"Atlantic",category:"5",winds:160,pressure:919,deaths:74,damage:"~25B",desc:"Florida Panhandle Cat 5 landfall."},
+      {name:"Hurricane Sandy",year:2012,basin:"Atlantic",category:"3",winds:115,pressure:940,deaths:233,damage:"~70B",desc:"Northeast hybrid impact."},
+      {name:"Hurricane Harvey",year:2017,basin:"Atlantic",category:"4",winds:130,pressure:938,deaths:107,damage:"~125B",desc:"Houston extreme rainfall."},
+      {name:"Hurricane Ian",year:2022,basin:"Atlantic",category:"5",winds:160,pressure:937,deaths:161,damage:"~113B",desc:"Southwest Florida landfall."},
+      {name:"Typhoon Vera (Isewan)",year:1959,basin:"Western Pacific",category:"5",winds:190,pressure:895,deaths:5000,damage:"Severe",desc:"Japan Ise Bay disaster."},
+      {name:"Cyclone Tracy",year:1974,basin:"South Indian / Australia",category:"4",winds:135,pressure:950,deaths:71,damage:"~800M",desc:"Destroyed Darwin, Australia."},
+      {name:"Hurricane Ike",year:2008,basin:"Atlantic",category:"4",winds:145,pressure:935,deaths:214,damage:"~38B",desc:"Texas surge."},
+      {name:"Hurricane Matthew",year:2016,basin:"Atlantic",category:"5",winds:165,pressure:934,deaths:603,damage:"~15B",desc:"Haiti + U.S. Southeast."},
+      {name:"Hurricane Ida",year:2021,basin:"Atlantic",category:"4",winds:150,pressure:929,deaths:107,damage:"~75B",desc:"Louisiana then Northeast flooding."}
     ];
-
-    // Deduplicate by name+year roughly
     const uniqueStorms = [];
     const seen = new Set();
     storms.forEach(s => {
       const key = s.name.toLowerCase().replace(/\s+/g,'') + s.year;
-      if (!seen.has(key)) {
-        seen.add(key);
-        uniqueStorms.push(s);
-      }
+      if (!seen.has(key)) { seen.add(key); uniqueStorms.push(s); }
     });
 
-    // ===================== LOADING SCREEN =====================
+    // ===== PRESETS =====
+    const PRESETS = [
+      { id:'cat5-atl', name:'Cat 5 Hurricane', type:'Hurricane', cat:'5', winds:175, pressure:920, label:'Atlantic-style' },
+      { id:'patricia', name:'Patricia-class', type:'Hurricane', cat:'5', winds:215, pressure:872, label:'215 mph EPAC' },
+      { id:'tip', name:'Tip-class', type:'Typhoon', cat:'5', winds:190, pressure:870, label:'870 mb WPAC' },
+      { id:'haiyan', name:'Haiyan-class', type:'Typhoon', cat:'5', winds:195, pressure:895, label:'Super Typhoon' },
+      { id:'cat4', name:'Major Cat 4', type:'Hurricane', cat:'4', winds:150, pressure:940, label:'Major hurricane' },
+      { id:'cat3', name:'Major Cat 3', type:'Hurricane', cat:'3', winds:120, pressure:960, label:'Major' },
+      { id:'winston', name:'Winston-class', type:'Cyclone', cat:'5', winds:175, pressure:884, label:'S. Hemisphere' },
+      { id:'ts', name:'Tropical Storm', type:'Hurricane', cat:'TS', winds:65, pressure:995, label:'TS strength' }
+    ];
+
+    // ===== LOADING =====
     const loadingScreen = document.getElementById('loading-screen');
     const progressBar = document.getElementById('progress-bar');
     const progressPercent = document.getElementById('progress-percent');
@@ -623,47 +376,147 @@
       if (progress >= 100) {
         progress = 100;
         clearInterval(loadInterval);
-        setTimeout(() => {
-          loadingScreen.classList.add('hidden');
-          initApp();
-        }, 400);
+        setTimeout(() => { loadingScreen.classList.add('hidden'); initApp(); }, 400);
       }
       progressBar.style.width = progress + '%';
       progressPercent.textContent = Math.floor(progress) + '%';
     }, 120);
 
-    // ===================== APP LOGIC =====================
+    // ===== APP =====
+    let map, targetMarker = null, targetLatLng = null;
+    let activeStorms = [];
+    let stormMarkers = {};
+
     function initApp() {
+      setupNav();
+      initLaunch();
       updateStats();
       renderFeatured();
       renderCatalog();
       renderDeadliest();
       renderStrongest();
       renderTimeline();
-      setupNav();
       setupFilters();
       setupModal();
     }
 
-    function catClass(c) {
-      if (c === '5') return 'cat-5';
-      if (c === '4') return 'cat-4';
-      if (c === '3') return 'cat-3';
-      if (c === '2') return 'cat-2';
-      if (c === '1') return 'cat-1';
-      if (c === 'TS') return 'cat-ts';
-      return 'cat-unk';
-    }
-    function catLabel(c) {
-      if (c === 'unk') return 'Unknown';
-      if (c === 'TS') return 'TS';
-      return 'Cat ' + c;
+    function setupNav() {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+          document.getElementById('view-' + btn.dataset.view).classList.add('active');
+          if (btn.dataset.view === 'launch' && map) setTimeout(() => map.invalidateSize(), 100);
+        });
+      });
     }
 
-    function formatDeaths(d) {
-      if (d >= 1000) return (d/1000).toFixed(d % 1000 === 0 ? 0 : 1) + 'k';
-      return d.toLocaleString();
+    function initLaunch() {
+      const grid = document.getElementById('preset-grid');
+      PRESETS.forEach(p => {
+        const b = document.createElement('button');
+        b.className = 'preset-btn';
+        b.type = 'button';
+        b.dataset.id = p.id;
+        b.innerHTML = `<span class="p-name">${p.name}</span><span class="p-stats">${p.winds} mph · ${p.pressure} mb</span>`;
+        b.addEventListener('click', () => {
+          document.querySelectorAll('.preset-btn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          document.getElementById('storm-name').value = p.name.includes('class') ? p.name.replace('-class','') : p.name;
+          document.getElementById('storm-type').value = p.type;
+          document.getElementById('storm-cat').value = p.cat;
+          document.getElementById('storm-winds').value = p.winds;
+          document.getElementById('storm-pressure').value = p.pressure;
+        });
+        grid.appendChild(b);
+      });
+      grid.querySelector('.preset-btn').classList.add('active');
+
+      map = L.map('map', { worldCopyJump: true }).setView([20, -40], 2);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OSM &copy; CARTO',
+        maxZoom: 10,
+        minZoom: 1
+      }).addTo(map);
+
+      map.on('click', (e) => {
+        targetLatLng = e.latlng;
+        if (targetMarker) map.removeLayer(targetMarker);
+        targetMarker = L.circleMarker(e.latlng, {
+          radius: 10, color: '#38bdf8', fillColor: '#0ea5e9', fillOpacity: 0.7, weight: 2
+        }).addTo(map).bindPopup('Target: ' + e.latlng.lat.toFixed(2) + ', ' + e.latlng.lng.toFixed(2)).openPopup();
+        document.getElementById('coord-display').textContent = e.latlng.lat.toFixed(3) + '°, ' + e.latlng.lng.toFixed(3) + '°';
+        document.getElementById('launch-btn').disabled = false;
+      });
+
+      document.getElementById('launch-btn').addEventListener('click', launchStorm);
     }
+
+    function launchStorm() {
+      if (!targetLatLng) return;
+      const name = document.getElementById('storm-name').value.trim() || 'Unnamed Storm';
+      const type = document.getElementById('storm-type').value;
+      const cat = document.getElementById('storm-cat').value;
+      const winds = parseInt(document.getElementById('storm-winds').value, 10) || 100;
+      const pressure = parseInt(document.getElementById('storm-pressure').value, 10) || 960;
+      const id = 's' + Date.now();
+
+      const storm = { id, name, type, cat, winds, pressure, lat: targetLatLng.lat, lng: targetLatLng.lng, time: new Date() };
+      activeStorms.push(storm);
+
+      const color = cat === '5' ? '#ef4444' : cat === '4' ? '#f97316' : cat === '3' ? '#eab308' : '#22c55e';
+      const m = L.circleMarker([storm.lat, storm.lng], {
+        radius: 14, color, fillColor: color, fillOpacity: 0.75, weight: 3
+      }).addTo(map);
+      m.bindPopup(`<strong>${type} ${name}</strong><br>Cat ${cat} · ${winds} mph · ${pressure} mb<br>${storm.lat.toFixed(2)}, ${storm.lng.toFixed(2)}`);
+      let r = 14;
+      const ring = setInterval(() => {
+        r += 4;
+        m.setRadius(r);
+        if (r > 40) { m.setRadius(14); clearInterval(ring); }
+      }, 40);
+      stormMarkers[id] = m;
+
+      renderActiveList();
+      if (targetMarker) { map.removeLayer(targetMarker); targetMarker = null; }
+      targetLatLng = null;
+      document.getElementById('coord-display').textContent = 'Click map to set…';
+      document.getElementById('launch-btn').disabled = true;
+    }
+
+    function renderActiveList() {
+      const list = document.getElementById('active-list');
+      if (activeStorms.length === 0) {
+        list.innerHTML = '<div style="color:#64748b;font-size:0.8rem;">None yet. Launch one.</div>';
+        return;
+      }
+      list.innerHTML = '';
+      activeStorms.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'active-item';
+        div.innerHTML = `
+          <div>
+            <div class="s-name">${s.type} ${s.name}</div>
+            <div class="s-meta">Cat ${s.cat} · ${s.winds} mph · ${s.pressure} mb · ${s.lat.toFixed(1)}°, ${s.lng.toFixed(1)}°</div>
+          </div>
+          <button type="button" data-id="${s.id}">Remove</button>
+        `;
+        div.querySelector('button').addEventListener('click', () => {
+          activeStorms = activeStorms.filter(x => x.id !== s.id);
+          if (stormMarkers[s.id]) { map.removeLayer(stormMarkers[s.id]); delete stormMarkers[s.id]; }
+          renderActiveList();
+        });
+        list.appendChild(div);
+      });
+    }
+
+    function catClass(c) {
+      if (c === '5') return 'cat-5'; if (c === '4') return 'cat-4'; if (c === '3') return 'cat-3';
+      if (c === '2') return 'cat-2'; if (c === '1') return 'cat-1'; if (c === 'TS') return 'cat-ts'; return 'cat-unk';
+    }
+    function catLabel(c) { if (c === 'unk') return 'Unknown'; if (c === 'TS') return 'TS'; return 'Cat ' + c; }
+    function formatDeaths(d) { if (d >= 1000) return (d/1000).toFixed(d % 1000 === 0 ? 0 : 1) + 'k'; return d.toLocaleString(); }
 
     function createCard(s) {
       const div = document.createElement('div');
@@ -689,79 +542,40 @@
       const byWinds = [...uniqueStorms].filter(s => s.winds).sort((a,b) => b.winds - a.winds)[0];
       const byDeaths = [...uniqueStorms].filter(s => s.deaths).sort((a,b) => b.deaths - a.deaths)[0];
       const byPressure = [...uniqueStorms].filter(s => s.pressure).sort((a,b) => a.pressure - b.pressure)[0];
-      if (byWinds) {
-        document.getElementById('stat-winds').textContent = byWinds.winds + ' mph';
-        document.getElementById('stat-winds-name').textContent = byWinds.name + ' (' + byWinds.year + ')';
-      }
-      if (byDeaths) {
-        document.getElementById('stat-deaths').textContent = formatDeaths(byDeaths.deaths);
-        document.getElementById('stat-deaths-name').textContent = byDeaths.name + ' (' + byDeaths.year + ')';
-      }
-      if (byPressure) {
-        document.getElementById('stat-pressure').textContent = byPressure.pressure + ' mb';
-        document.getElementById('stat-pressure-name').textContent = byPressure.name + ' (' + byPressure.year + ')';
-      }
+      if (byWinds) { document.getElementById('stat-winds').textContent = byWinds.winds + ' mph'; document.getElementById('stat-winds-name').textContent = byWinds.name + ' (' + byWinds.year + ')'; }
+      if (byDeaths) { document.getElementById('stat-deaths').textContent = formatDeaths(byDeaths.deaths); document.getElementById('stat-deaths-name').textContent = byDeaths.name + ' (' + byDeaths.year + ')'; }
+      if (byPressure) { document.getElementById('stat-pressure').textContent = byPressure.pressure + ' mb'; document.getElementById('stat-pressure-name').textContent = byPressure.name + ' (' + byPressure.year + ')'; }
     }
 
     function renderFeatured() {
       const grid = document.getElementById('featured-grid');
       grid.innerHTML = '';
-      const featured = [...uniqueStorms]
-        .filter(s => s.deaths > 1000 || (s.winds && s.winds >= 175) || (s.pressure && s.pressure <= 900))
-        .slice(0, 9);
-      featured.forEach(s => grid.appendChild(createCard(s)));
+      [...uniqueStorms].filter(s => s.deaths > 1000 || (s.winds && s.winds >= 175) || (s.pressure && s.pressure <= 900)).slice(0, 9).forEach(s => grid.appendChild(createCard(s)));
     }
-
     function renderCatalog(filtered = uniqueStorms) {
       const grid = document.getElementById('catalog-grid');
       grid.innerHTML = '';
-      if (filtered.length === 0) {
-        grid.innerHTML = '<p style="color:#94a3b8;grid-column:1/-1;">No storms match the current filters.</p>';
-        return;
-      }
+      if (!filtered.length) { grid.innerHTML = '<p style="color:#94a3b8;grid-column:1/-1;">No storms match.</p>'; return; }
       filtered.forEach(s => grid.appendChild(createCard(s)));
     }
-
     function renderDeadliest() {
       const grid = document.getElementById('deadliest-grid');
       grid.innerHTML = '';
-      const list = [...uniqueStorms].filter(s => s.deaths).sort((a,b) => b.deaths - a.deaths).slice(0, 20);
-      list.forEach(s => grid.appendChild(createCard(s)));
+      [...uniqueStorms].filter(s => s.deaths).sort((a,b) => b.deaths - a.deaths).slice(0, 20).forEach(s => grid.appendChild(createCard(s)));
     }
-
     function renderStrongest() {
       const grid = document.getElementById('strongest-grid');
       grid.innerHTML = '';
-      const byWinds = [...uniqueStorms].filter(s => s.winds).sort((a,b) => b.winds - a.winds).slice(0, 12);
-      byWinds.forEach(s => grid.appendChild(createCard(s)));
+      [...uniqueStorms].filter(s => s.winds).sort((a,b) => b.winds - a.winds).slice(0, 12).forEach(s => grid.appendChild(createCard(s)));
     }
-
     function renderTimeline() {
       const list = document.getElementById('timeline-list');
       list.innerHTML = '';
-      const timeline = [...uniqueStorms]
-        .filter(s => s.deaths > 500 || (s.winds && s.winds >= 175) || s.year < 1900)
-        .sort((a,b) => a.year - b.year);
-      timeline.forEach(s => {
+      [...uniqueStorms].filter(s => s.deaths > 500 || (s.winds && s.winds >= 175) || s.year < 1900).sort((a,b) => a.year - b.year).forEach(s => {
         const item = document.createElement('div');
         item.className = 'timeline-item';
-        item.innerHTML = `
-          <h4>${s.name}</h4>
-          <div class="date">${s.year} · ${s.basin}${s.winds ? ' · ' + s.winds + ' mph' : ''}${s.deaths ? ' · ~' + formatDeaths(s.deaths) + ' deaths' : ''}</div>
-          <p>${s.desc}</p>
-        `;
+        item.innerHTML = `<h4>${s.name}</h4><div class="date">${s.year} · ${s.basin}${s.winds ? ' · ' + s.winds + ' mph' : ''}${s.deaths ? ' · ~' + formatDeaths(s.deaths) + ' deaths' : ''}</div><p>${s.desc}</p>`;
         list.appendChild(item);
-      });
-    }
-
-    function setupNav() {
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-          document.getElementById('view-' + btn.dataset.view).classList.add('active');
-        });
       });
     }
 
@@ -773,14 +587,7 @@
       function apply() {
         let list = [...uniqueStorms];
         const q = search.value.toLowerCase().trim();
-        if (q) {
-          list = list.filter(s =>
-            s.name.toLowerCase().includes(q) ||
-            String(s.year).includes(q) ||
-            s.basin.toLowerCase().includes(q) ||
-            (s.desc && s.desc.toLowerCase().includes(q))
-          );
-        }
+        if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || String(s.year).includes(q) || s.basin.toLowerCase().includes(q) || (s.desc && s.desc.toLowerCase().includes(q)));
         if (basin.value !== 'all') list = list.filter(s => s.basin === basin.value);
         if (cat.value !== 'all') list = list.filter(s => s.category === cat.value);
         const [key, dir] = sort.value.split('-');
@@ -804,7 +611,6 @@
       document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
       modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
     }
-
     function openModal(s) {
       document.getElementById('modal-title').textContent = s.name;
       document.getElementById('modal-subtitle').textContent = s.year + ' · ' + s.basin + ' · ' + catLabel(s.category);
